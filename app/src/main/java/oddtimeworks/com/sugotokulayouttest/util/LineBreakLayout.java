@@ -33,6 +33,38 @@ public class LineBreakLayout extends RelativeLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int count = getChildCount();
 
+        if (count > 0) {
+            int max = MeasureSpec.getSize(widthMeasureSpec);
+            View pline = this.getChildAt(0);
+            View prev = this.getChildAt(0);
 
+            prev.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+            int currentTotal = pline.getMeasuredWidth();
+
+            for(int i = 1; i < count; i++) {
+                View child = this.getChildAt(i);
+                child.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+                int width = child.getMeasuredWidth();
+
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) child.getLayoutParams();
+
+                if(max > currentTotal + width) {
+                    currentTotal += width;
+
+                    layoutParams.addRule(RelativeLayout.ALIGN_TOP, prev.getId());
+                    layoutParams.addRule(RelativeLayout.RIGHT_OF, prev.getId());
+                }else{
+                    layoutParams.addRule(RelativeLayout.BELOW, pline.getId());
+                    layoutParams.addRule(RelativeLayout.ALIGN_LEFT, pline.getId());
+
+                    pline = child;
+                    currentTotal = pline.getMeasuredWidth();
+                }
+                prev = child;
+            }
+        }
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }
